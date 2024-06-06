@@ -1,3 +1,9 @@
+#plugin_arg_menu {
+    transform: translate(-50%, -50%);
+    border: dashed;
+}
+
+
 /* hide remove all button */
 .remove-all.svelte-aqlk7e.svelte-aqlk7e.svelte-aqlk7e {
     visibility: hidden;
@@ -109,6 +115,7 @@
     border-width: thin;
     user-select: none;
     padding-left: 2%;
+    text-align: center;
 }
 
 .floating-component #input-panel2 {
@@ -118,3 +125,20 @@
     border-width: thin;
     border-top-width: 0;
 }
+
+.floating-component #plugin_arg_panel {
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border: solid;
+    border-width: thin;
+    border-top-width: 0;
+}
+
+.floating-component #edit-panel {
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border: solid;
+    border-width: thin;
+    border-top-width: 0;
+}
+

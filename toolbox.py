@@ -90,7 +90,7 @@ def ArgsGeneralWrapper(f):
     """
     def decorated(request: gradio.Request, cookies:dict, max_length:int, llm_model:str,
                   txt:str, txt2:str, top_p:float, temperature:float, chatbot:list,
-                  history:list, system_prompt:str, plugin_advanced_arg:str, *args):
+                  history:list, system_prompt:str, plugin_advanced_arg:dict, *args):
         txt_passon = txt
         if txt == "" and txt2 != "": txt_passon = txt2
         # 引入一个有cookie的chatbot
@@ -114,9 +114,10 @@ def ArgsGeneralWrapper(f):
             'client_ip': request.client.host,
             'most_recent_uploaded': cookies.get('most_recent_uploaded')
         }
-        plugin_kwargs = {
-            "advanced_arg": plugin_advanced_arg,
-        }
+        if isinstance(plugin_advanced_arg, str):
+            plugin_kwargs = {"advanced_arg": plugin_advanced_arg}
+        else:
+            plugin_kwargs = plugin_advanced_arg
         chatbot_with_cookie = ChatBotWithCookies(cookies)
         chatbot_with_cookie.write_list(chatbot)
 
@@ -562,7 +563,7 @@ def on_report_generated(cookies:dict, files:List[str], chatbot:ChatBotWithCookie
         file_links += (
             f'<br/><a href="file={os.path.abspath(f)}" target="_blank">{f}</a>'
         )
-    chatbot.append(["报告如何远程获取？", f"报告已经添加到右侧“文件上传区”（可能处于折叠状态），请查收。{file_links}"])
+    chatbot.append(["报告如何远程获取？", f"报告已经添加到右侧“文件下载区”（可能处于折叠状态），请查收。{file_links}"])
     return cookies, report_files, chatbot
 
 

@@ -158,65 +158,72 @@ def arxiv_download(chatbot, history, txt, allow_cache=True):
     return extract_dst, arxiv_id
 
 
-def pdf2tex_project(pdf_file_path):
-    # Mathpix API credentials
-    app_id, app_key = get_conf('MATHPIX_APPID', 'MATHPIX_APPKEY')
-    headers = {"app_id": app_id, "app_key": app_key}
+def pdf2tex_project(pdf_file_path, plugin_kwargs):
+    if plugin_kwargs["method"] == "MATHPIX":
+        # Mathpix API credentials
+        app_id, app_key = get_conf('MATHPIX_APPID', 'MATHPIX_APPKEY')
+        headers = {"app_id": app_id, "app_key": app_key}
 
-    # Step 1: Send PDF file for processing
-    options = {
-        "conversion_formats": {"tex.zip": True},
-        "math_inline_delimiters": ["$", "$"],
-        "rm_spaces": True
-    }
+        # Step 1: Send PDF file for processing
+        options = {
+            "conversion_formats": {"tex.zip": True},
+            "math_inline_delimiters": ["$", "$"],
+            "rm_spaces": True
+        }
 
-    response = requests.post(url="https://api.mathpix.com/v3/pdf",
-                             headers=headers,
-                             data={"options_json": json.dumps(options)},
-                             files={"file": open(pdf_file_path, "rb")})
+        response = requests.post(url="https://api.mathpix.com/v3/pdf",
+                                headers=headers,
+                                data={"options_json": json.dumps(options)},
+                                files={"file": open(pdf_file_path, "rb")})
 
-    if response.ok:
-        pdf_id = response.json()["pdf_id"]
-        print(f"PDF processing initiated. PDF ID: {pdf_id}")
+        if response.ok:
+            pdf_id = response.json()["pdf_id"]
+            print(f"PDF processing initiated. PDF ID: {pdf_id}")
 
-        # Step 2: Check processing status
-        while True:
-            conversion_response = requests.get(f"https://api.mathpix.com/v3/pdf/{pdf_id}", headers=headers)
-            conversion_data = conversion_response.json()
+            # Step 2: Check processing status
+            while True:
+                conversion_response = requests.get(f"https://api.mathpix.com/v3/pdf/{pdf_id}", headers=headers)
+                conversion_data = conversion_response.json()
 
-            if conversion_data["status"] == "completed":
-                print("PDF processing completed.")
-                break
-            elif conversion_data["status"] == "error":
-                print("Error occurred during processing.")
-            else:
-                print(f"Processing status: {conversion_data['status']}")
-                time.sleep(5)  # wait for a few seconds before checking again
+                if conversion_data["status"] == "completed":
+                    print("PDF processing completed.")
+                    break
+                elif conversion_data["status"] == "error":
+                    print("Error occurred during processing.")
+                else:
+                    print(f"Processing status: {conversion_data['status']}")
+                    time.sleep(5)  # wait for a few seconds before checking again
 
-        # Step 3: Save results to local files
-        output_dir = os.path.join(os.path.dirname(pdf_file_path), 'mathpix_output')
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+            # Step 3: Save results to local files
+            output_dir = os.path.join(os.path.dirname(pdf_file_path), 'mathpix_output')
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
 
-        url = f"https://api.mathpix.com/v3/pdf/{pdf_id}.tex"
-        response = requests.get(url, headers=headers)
-        file_name_wo_dot = '_'.join(os.path.basename(pdf_file_path).split('.')[:-1])
-        output_name = f"{file_name_wo_dot}.tex.zip"
-        output_path = os.path.join(output_dir, output_name)
-        with open(output_path, "wb") as output_file:
-            output_file.write(response.content)
-        print(f"tex.zip file saved at: {output_path}")
+            url = f"https://api.mathpix.com/v3/pdf/{pdf_id}.tex"
+            response = requests.get(url, headers=headers)
+            file_name_wo_dot = '_'.join(os.path.basename(pdf_file_path).split('.')[:-1])
+            output_name = f"{file_name_wo_dot}.tex.zip"
+            output_path = os.path.join(output_dir, output_name)
+            with open(output_path, "wb") as output_file:
+                output_file.write(response.content)
+            print(f"tex.zip file saved at: {output_path}")
 
-        import zipfile
-        unzip_dir = os.path.join(output_dir, file_name_wo_dot)
-        with zipfile.ZipFile(output_path, 'r') as zip_ref:
-            zip_ref.extractall(unzip_dir)
+            import zipfile
+            unzip_dir = os.path.join(output_dir, file_name_wo_dot)
+            with zipfile.ZipFile(output_path, 'r') as zip_ref:
+                zip_ref.extractall(unzip_dir)
 
+            return unzip_dir
+
+        else:
+            print(f"Error sending PDF for processing. Status code: {response.status_code}")
+            return None
+    else:
+        from crazy_functions.pdf_fns.parse_pdf_via_doc2x import 解析PDF_DOC2X_转Latex
+        unzip_dir = 解析PDF_DOC2X_转Latex(pdf_file_path)
         return unzip_dir
 
-    else:
-        print(f"Error sending PDF for processing. Status code: {response.status_code}")
-        return None
+
 
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= 插件主程序1 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -287,7 +294,7 @@ def Latex英文纠错加PDF对比(txt, llm_kwargs, plugin_kwargs, chatbot, histo
         promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
     else:
         chatbot.append((f"失败了",
-                        '虽然PDF生成失败了, 但请查收结果（压缩包）, 内含已经翻译的Tex文档, 也是可读的, 您可以到Github Issue区, 用该压缩包+对话历史存档进行反馈 ...'))
+                        '虽然PDF生成失败了, 但请查收结果（压缩包）, 内含已经翻译的Tex文档, 也是可读的, 您可以到Github Issue区, 用该压缩包+Conversation_To_File进行反馈 ...'))
         yield from update_ui(chatbot=chatbot, history=history);
         time.sleep(1)  # 刷新界面
         promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
@@ -437,107 +444,99 @@ def PDF翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot, h
         report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"不支持同时处理多个pdf文件: {txt}")
         yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
         return
-    app_id, app_key = get_conf('MATHPIX_APPID', 'MATHPIX_APPKEY')
-    if len(app_id) == 0 or len(app_key) == 0:
-        report_exception(chatbot, history, a="缺失 MATHPIX_APPID 和 MATHPIX_APPKEY。", b=f"请配置 MATHPIX_APPID 和 MATHPIX_APPKEY")
-        yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
-        return
 
-    hash_tag = map_file_to_sha256(file_manifest[0])
-
-    # <-------------- check repeated pdf ------------->
-    chatbot.append([f"检查PDF是否被重复上传", "正在检查..."])
-    yield from update_ui(chatbot=chatbot, history=history)
-    repeat, project_folder = check_repeat_upload(file_manifest[0], hash_tag)
-
-    except_flag = False
-
-    if repeat:
-        yield from update_ui_lastest_msg(f"发现重复上传，请查收结果（压缩包）...", chatbot=chatbot, history=history)
-
-        try:
-            trans_html_file = [f for f in glob.glob(f'{project_folder}/**/*.trans.html', recursive=True)][0]
-            promote_file_to_downloadzone(trans_html_file, rename_file=None, chatbot=chatbot)
-
-            translate_pdf = [f for f in glob.glob(f'{project_folder}/**/merge_translate_zh.pdf', recursive=True)][0]
-            promote_file_to_downloadzone(translate_pdf, rename_file=None, chatbot=chatbot)
-
-            comparison_pdf = [f for f in glob.glob(f'{project_folder}/**/comparison.pdf', recursive=True)][0]
-            promote_file_to_downloadzone(comparison_pdf, rename_file=None, chatbot=chatbot)
-
-            zip_res = zip_result(project_folder)
-            promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
-
-            return True
-
-        except:
-            report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"发现重复上传，但是无法找到相关文件")
-            yield from update_ui(chatbot=chatbot, history=history)
-
-            chatbot.append([f"没有相关文件", '尝试重新翻译PDF...'])
-            yield from update_ui(chatbot=chatbot, history=history)
-
-            except_flag = True
-
-
-    elif not repeat or except_flag:
-        yield from update_ui_lastest_msg(f"未发现重复上传", chatbot=chatbot, history=history)
-
-        # <-------------- convert pdf into tex ------------->
-        chatbot.append([f"解析项目: {txt}", "正在将PDF转换为tex项目，请耐心等待..."])
-        yield from update_ui(chatbot=chatbot, history=history)
-        project_folder = pdf2tex_project(file_manifest[0])
-        if project_folder is None:
-            report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"PDF转换为tex项目失败")
-            yield from update_ui(chatbot=chatbot, history=history)
-            return False
-
-        # <-------------- translate latex file into Chinese ------------->
-        yield from update_ui_lastest_msg("正在tex项目将翻译为中文...", chatbot=chatbot, history=history)
-        file_manifest = [f for f in glob.glob(f'{project_folder}/**/*.tex', recursive=True)]
-        if len(file_manifest) == 0:
-            report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"找不到任何.tex文件: {txt}")
+    if plugin_kwargs.get("method", "") == 'MATHPIX':
+        app_id, app_key = get_conf('MATHPIX_APPID', 'MATHPIX_APPKEY')
+        if len(app_id) == 0 or len(app_key) == 0:
+            report_exception(chatbot, history, a="缺失 MATHPIX_APPID 和 MATHPIX_APPKEY。", b=f"请配置 MATHPIX_APPID 和 MATHPIX_APPKEY")
+            yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
+            return
+    if plugin_kwargs.get("method", "") == 'DOC2X':
+        app_id, app_key = "", ""
+        DOC2X_API_KEY = get_conf('DOC2X_API_KEY')
+        if len(DOC2X_API_KEY) == 0:
+            report_exception(chatbot, history, a="缺失 DOC2X_API_KEY。", b=f"请配置 DOC2X_API_KEY")
             yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
             return
 
-        # <-------------- if is a zip/tar file ------------->
-        project_folder = desend_to_extracted_folder_if_exist(project_folder)
+    hash_tag = map_file_to_sha256(file_manifest[0])
 
-        # <-------------- move latex project away from temp folder ------------->
-        project_folder = move_project(project_folder)
+    # # <-------------- check repeated pdf ------------->
+    # chatbot.append([f"检查PDF是否被重复上传", "正在检查..."])
+    # yield from update_ui(chatbot=chatbot, history=history)
+    # repeat, project_folder = check_repeat_upload(file_manifest[0], hash_tag)
 
-        # <-------------- set a hash tag for repeat-checking ------------->
-        with open(pj(project_folder, hash_tag + '.tag'), 'w') as f:
-            f.write(hash_tag)
-            f.close()
+    # if repeat:
+    #     yield from update_ui_lastest_msg(f"发现重复上传，请查收结果（压缩包）...", chatbot=chatbot, history=history)
+    #     try:
+    #         translate_pdf = [f for f in glob.glob(f'{project_folder}/**/merge_translate_zh.pdf', recursive=True)][0]
+    #         promote_file_to_downloadzone(translate_pdf, rename_file=None, chatbot=chatbot)
+    #         comparison_pdf = [f for f in glob.glob(f'{project_folder}/**/comparison.pdf', recursive=True)][0]
+    #         promote_file_to_downloadzone(comparison_pdf, rename_file=None, chatbot=chatbot)
+    #         zip_res = zip_result(project_folder)
+    #         promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
+    #         return
+    #     except:
+    #         report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"发现重复上传，但是无法找到相关文件")
+    #         yield from update_ui(chatbot=chatbot, history=history)
+    # else:
+    #     yield from update_ui_lastest_msg(f"未发现重复上传", chatbot=chatbot, history=history)
+
+    # <-------------- convert pdf into tex ------------->
+    chatbot.append([f"解析项目: {txt}", "正在将PDF转换为tex项目，请耐心等待..."])
+    yield from update_ui(chatbot=chatbot, history=history)
+    project_folder = pdf2tex_project(file_manifest[0], plugin_kwargs)
+    if project_folder is None:
+        report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"PDF转换为tex项目失败")
+        yield from update_ui(chatbot=chatbot, history=history)
+        return False
+
+    # <-------------- translate latex file into Chinese ------------->
+    yield from update_ui_lastest_msg("正在tex项目将翻译为中文...", chatbot=chatbot, history=history)
+    file_manifest = [f for f in glob.glob(f'{project_folder}/**/*.tex', recursive=True)]
+    if len(file_manifest) == 0:
+        report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"找不到任何.tex文件: {txt}")
+        yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
+        return
+
+    # <-------------- if is a zip/tar file ------------->
+    project_folder = desend_to_extracted_folder_if_exist(project_folder)
+
+    # <-------------- move latex project away from temp folder ------------->
+    project_folder = move_project(project_folder)
+
+    # <-------------- set a hash tag for repeat-checking ------------->
+    with open(pj(project_folder, hash_tag + '.tag'), 'w') as f:
+        f.write(hash_tag)
+        f.close()
 
 
-        # <-------------- if merge_translate_zh is already generated, skip gpt req ------------->
-        if not os.path.exists(project_folder + '/merge_translate_zh.tex'):
-            yield from Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
-                                        chatbot, history, system_prompt, mode='translate_zh',
-                                        switch_prompt=_switch_prompt_)
+    # <-------------- if merge_translate_zh is already generated, skip gpt req ------------->
+    if not os.path.exists(project_folder + '/merge_translate_zh.tex'):
+        yield from Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
+                                    chatbot, history, system_prompt, mode='translate_zh',
+                                    switch_prompt=_switch_prompt_)
 
-        # <-------------- compile PDF ------------->
-        yield from update_ui_lastest_msg("正在将翻译好的项目tex项目编译为PDF...", chatbot=chatbot, history=history)
-        success = yield from 编译Latex(chatbot, history, main_file_original='merge',
-                                    main_file_modified='merge_translate_zh', mode='translate_zh',
-                                    work_folder_original=project_folder, work_folder_modified=project_folder,
-                                    work_folder=project_folder)
+    # <-------------- compile PDF ------------->
+    yield from update_ui_lastest_msg("正在将翻译好的项目tex项目编译为PDF...", chatbot=chatbot, history=history)
+    success = yield from 编译Latex(chatbot, history, main_file_original='merge',
+                                main_file_modified='merge_translate_zh', mode='translate_zh',
+                                work_folder_original=project_folder, work_folder_modified=project_folder,
+                                work_folder=project_folder)
 
-        # <-------------- zip PDF ------------->
-        zip_res = zip_result(project_folder)
-        if success:
-            chatbot.append((f"成功啦", '请查收结果（压缩包）...'))
-            yield from update_ui(chatbot=chatbot, history=history);
-            time.sleep(1)  # 刷新界面
-            promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
-        else:
-            chatbot.append((f"失败了",
-                            '虽然PDF生成失败了, 但请查收结果（压缩包）, 内含已经翻译的Tex文档, 您可以到Github Issue区, 用该压缩包进行反馈。如系统是Linux，请检查系统字体（见Github wiki） ...'))
-            yield from update_ui(chatbot=chatbot, history=history);
-            time.sleep(1)  # 刷新界面
-            promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
+    # <-------------- zip PDF ------------->
+    zip_res = zip_result(project_folder)
+    if success:
+        chatbot.append((f"成功啦", '请查收结果（压缩包）...'))
+        yield from update_ui(chatbot=chatbot, history=history);
+        time.sleep(1)  # 刷新界面
+        promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
+    else:
+        chatbot.append((f"失败了",
+                        '虽然PDF生成失败了, 但请查收结果（压缩包）, 内含已经翻译的Tex文档, 您可以到Github Issue区, 用该压缩包进行反馈。如系统是Linux，请检查系统字体（见Github wiki） ...'))
+        yield from update_ui(chatbot=chatbot, history=history);
+        time.sleep(1)  # 刷新界面
+        promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
 
-        # <-------------- we are done ------------->
-        return success
+    # <-------------- we are done ------------->
+    return success

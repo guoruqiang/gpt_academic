@@ -48,7 +48,8 @@ AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-p
 #   "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613", "gpt-3.5-turbo-0125", "gpt-4o-2024-05-13"
 #   "claude-3-haiku-20240307","claude-3-sonnet-20240229","claude-3-opus-20240229", "claude-2.1", "claude-instant-1.2",
 #   "moss", "llama2", "chatglm_onnx", "internlm", "jittorllms_pangualpha", "jittorllms_llama",
-#   "yi-34b-chat-0205", "yi-34b-chat-200k"
+#   "deepseek-chat" ,"deepseek-coder",
+#   "yi-34b-chat-0205","yi-34b-chat-200k","yi-large","yi-medium","yi-spark","yi-large-turbo","yi-large-preview",
 # ]
 # --- --- --- ---
 # 此外，您还可以在接入one-api/vllm/ollama时，
@@ -133,7 +134,7 @@ DASHSCOPE_API_KEY = "" # 阿里灵积云API_KEY
 # 百度千帆（LLM_MODEL="qianfan"）
 BAIDU_CLOUD_API_KEY = ''
 BAIDU_CLOUD_SECRET_KEY = ''
-BAIDU_CLOUD_QIANFAN_MODEL = 'ERNIE-Bot'    # 可选 "ERNIE-Bot-4"(文心大模型4.0), "ERNIE-Bot"(文心一言), "ERNIE-Bot-turbo", "BLOOMZ-7B", "Llama-2-70B-Chat", "Llama-2-13B-Chat", "Llama-2-7B-Chat"
+BAIDU_CLOUD_QIANFAN_MODEL = 'ERNIE-Bot'    # 可选 "ERNIE-Bot-4"(文心大模型4.0), "ERNIE-Bot"(文心一言), "ERNIE-Bot-turbo", "BLOOMZ-7B", "Llama-2-70B-Chat", "Llama-2-13B-Chat", "Llama-2-7B-Chat", "ERNIE-Speed-128K", "ERNIE-Speed-8K", "ERNIE-Lite-8K"
 
 
 # 如果使用ChatGLM2微调模型，请把 LLM_MODEL="chatglmft"，并在此处指定模型路径
@@ -201,7 +202,7 @@ ALIYUN_SECRET=""    # （无需填写）
 
 
 # GPT-SOVITS 文本转语音服务的运行地址（将语言模型的生成文本朗读出来）
-TTS_TYPE = "DISABLE" # EDGE_TTS / LOCAL_SOVITS_API / DISABLE
+TTS_TYPE = "EDGE_TTS" # EDGE_TTS / LOCAL_SOVITS_API / DISABLE
 GPT_SOVITS_URL = ""
 EDGE_TTS_VOICE = "zh-CN-XiaoxiaoNeural"
 
@@ -228,6 +229,8 @@ MOONSHOT_API_KEY = ""
 # 零一万物(Yi Model) API KEY
 YIMODEL_API_KEY = ""
 
+# 深度求索(DeepSeek) API KEY，默认请求地址为"https://api.deepseek.com/v1/chat/completions"
+DEEPSEEK_API_KEY = ""
 
 # Mathpix 拥有执行PDF的OCR功能，但是需要注册账号
 MATHPIX_APPID = ""
