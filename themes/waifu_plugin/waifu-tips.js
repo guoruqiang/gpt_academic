@@ -264,7 +264,7 @@ function loadTipsMessage(result) {
     });
 
     window.showWelcomeMessage = function(result) {
-        showMessage('欢迎使用GPT-Academic', 6000);
+        showMessage('欢迎使用西农er’s GPT 学术版', 6000);
     }; if (live2d_settings.showWelcomeMessage) showWelcomeMessage(result);
 
     var waifu_tips = result.waifu;

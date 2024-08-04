@@ -276,7 +276,7 @@ def get_crazy_functions():
         "理解PDF文档内容 （模仿ChatPDF）": {
             "Group": "学术",
             "Color": "stop",
-            "AsButton": False,  # 加入下拉菜单中
+            "AsButton": True,  # 加入下拉菜单中
             "Info": "理解PDF文档的内容并进行回答 | 输入参数为路径",
             "Function": HotReload(理解PDF文档内容标准文件输入),
         },

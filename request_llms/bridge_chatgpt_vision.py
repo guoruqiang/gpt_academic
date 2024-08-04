@@ -159,7 +159,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                 # 非OpenAI官方接口的出现这样的报错，OpenAI和API2D不会走这里
                 chunk_decoded = chunk.decode()
                 error_msg = chunk_decoded
-                # 首先排除一个one-api没有done数据包的第三方Bug情形
+                # 首先排除一个nwafu没有done数据包的第三方Bug情形
                 if len(gpt_replying_buffer.strip()) > 0 and len(error_msg) == 0:
                     yield from update_ui(chatbot=chatbot, history=history, msg="检测到有缺陷的非OpenAI官方接口，建议选择更稳定的接口。")
                     break

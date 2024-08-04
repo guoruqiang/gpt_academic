@@ -290,7 +290,7 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
                 # 非OpenAI官方接口的出现这样的报错，OpenAI和API2D不会走这里
                 chunk_decoded = chunk.decode()
                 error_msg = chunk_decoded
-                # 首先排除一个one-api没有done数据包的第三方Bug情形
+                # 首先排除一个nwafu没有done数据包的第三方Bug情形
                 if len(gpt_replying_buffer.strip()) > 0 and len(error_msg) == 0:
                     yield from update_ui(chatbot=chatbot, history=history, msg="检测到有缺陷的非OpenAI官方接口，建议选择更稳定的接口。")
                     break
@@ -471,8 +471,8 @@ def generate_payload(inputs:str, llm_kwargs:dict, history:list, system_prompt:st
     model = llm_kwargs['llm_model']
     if llm_kwargs['llm_model'].startswith('api2d-'):
         model = llm_kwargs['llm_model'][len('api2d-'):]
-    if llm_kwargs['llm_model'].startswith('one-api-'):
-        model = llm_kwargs['llm_model'][len('one-api-'):]
+    if llm_kwargs['llm_model'].startswith('nwafu-'):
+        model = llm_kwargs['llm_model'][len('nwafu-'):]
         model, _ = read_one_api_model_name(model)
     if llm_kwargs['llm_model'].startswith('vllm-'):
         model = llm_kwargs['llm_model'][len('vllm-'):]

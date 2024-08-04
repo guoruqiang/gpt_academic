@@ -968,19 +968,19 @@ if "deepseek-chat" in AVAIL_LLM_MODELS or "deepseek-coder" in AVAIL_LLM_MODELS:
         })
     except:
         print(trimmed_format_exc())
-# -=-=-=-=-=-=- one-api 对齐支持 -=-=-=-=-=-=-
-for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
-    # 为了更灵活地接入one-api多模型管理界面，设计了此接口，例子：AVAIL_LLM_MODELS = ["one-api-mixtral-8x7b(max_token=6666)"]
+# -=-=-=-=-=-=- nwafu 对齐支持 -=-=-=-=-=-=-
+for model in [m for m in AVAIL_LLM_MODELS if m.startswith("nwafu-")]:
+    # 为了更灵活地接入nwafu多模型管理界面，设计了此接口，例子：AVAIL_LLM_MODELS = ["nwafu-mixtral-8x7b(max_token=6666)"]
     # 其中
-    #   "one-api-"          是前缀（必要）
+    #   "nwafu-"          是前缀（必要）
     #   "mixtral-8x7b"      是模型名（必要）
     #   "(max_token=6666)"  是配置（非必要）
     try:
         origin_model_name, max_token_tmp = read_one_api_model_name(model)
         # 如果是已知模型，则尝试获取其信息
-        original_model_info = model_info.get(origin_model_name.replace("one-api-", "", 1), None)
+        original_model_info = model_info.get(origin_model_name.replace("nwafu-", "", 1), None)
     except:
-        print(f"one-api模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
+        print(f"nwafu模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
         continue
     this_model_info = {
         "fn_with_ui": chatgpt_ui,

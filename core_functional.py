@@ -119,7 +119,7 @@ def get_core_functions():
         "英译中": {
             "Prefix":   r"翻译成地道的中文：" + "\n\n",
             "Suffix":   r"",
-            "Visible":  False,
+            "Visible":  True,
         },
 
 
