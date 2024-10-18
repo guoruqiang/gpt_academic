@@ -1,10 +1,10 @@
-from toolbox import update_ui, get_conf, trimmed_format_exc, get_max_token, Singleton
-from shared_utils.char_visual_effect import scolling_visual_effect
-import threading
 import os
-import logging
+import threading
+from loguru import logger
+from shared_utils.char_visual_effect import scolling_visual_effect
+from toolbox import update_ui, get_conf, trimmed_format_exc, get_max_token, Singleton
 
-def input_clipping(inputs, history, max_token_limit):
+def input_clipping(inputs, history, max_token_limit, return_clip_flags=False):
     """
     当输入文本 + 历史文本超出最大限制时，采取措施丢弃一部分文本。
     输入：
@@ -20,17 +20,20 @@ def input_clipping(inputs, history, max_token_limit):
     enc = model_info["gpt-3.5-turbo"]['tokenizer']
     def get_token_num(txt): return len(enc.encode(txt, disallowed_special=()))
 
+
     mode = 'input-and-history'
     # 当 输入部分的token占比 小于 全文的一半时，只裁剪历史
     input_token_num = get_token_num(inputs)
+    original_input_len = len(inputs)
     if input_token_num < max_token_limit//2:
         mode = 'only-history'
         max_token_limit = max_token_limit - input_token_num
 
     everything = [inputs] if mode == 'input-and-history' else ['']
     everything.extend(history)
-    n_token = get_token_num('\n'.join(everything))
+    full_token_num = n_token = get_token_num('\n'.join(everything))
     everything_token = [get_token_num(e) for e in everything]
+    everything_token_num = sum(everything_token)
     delta = max(everything_token) // 16 # 截断时的颗粒度
 
     while n_token > max_token_limit:
@@ -43,10 +46,24 @@ def input_clipping(inputs, history, max_token_limit):
 
     if mode == 'input-and-history':
         inputs = everything[0]
+        full_token_num = everything_token_num
     else:
-        pass
+        full_token_num = everything_token_num + input_token_num
+
     history = everything[1:]
-    return inputs, history
+
+    flags = {
+        "mode": mode,
+        "original_input_token_num": input_token_num,
+        "original_full_token_num": full_token_num,
+        "original_input_len": original_input_len,
+        "clipped_input_len": len(inputs),
+    }
+
+    if not return_clip_flags:
+        return inputs, history
+    else:
+        return inputs, history, flags
 
 def request_gpt_model_in_new_thread_with_ui_alive(
         inputs, inputs_show_user, llm_kwargs,
@@ -116,7 +133,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
             except:
                 # 【第三种情况】：其他错误：重试几次
                 tb_str = '```\n' + trimmed_format_exc() + '```'
-                print(tb_str)
+                logger.error(tb_str)
                 mutable[0] += f"[Local Message] 警告，在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                 if retry_op > 0:
                     retry_op -= 1
@@ -266,7 +283,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                 # 【第三种情况】：其他错误
                 if detect_timeout(): raise RuntimeError("检测到程序终止。")
                 tb_str = '```\n' + trimmed_format_exc() + '```'
-                print(tb_str)
+                logger.error(tb_str)
                 gpt_say += f"[Local Message] 警告，线程{index}在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                 if len(mutable[index][0]) > 0: gpt_say += "此线程失败前收到的回答：\n\n" + mutable[index][0]
                 if retry_op > 0:
@@ -361,7 +378,7 @@ def read_and_clean_pdf_text(fp):
     import fitz, copy
     import re
     import numpy as np
-    from shared_utils.colorful import print亮黄, print亮绿
+    # from shared_utils.colorful import print亮黄, print亮绿
     fc = 0  # Index 0 文本
     fs = 1  # Index 1 字体
     fb = 2  # Index 2 框框
@@ -578,7 +595,7 @@ class nougat_interface():
     def nougat_with_timeout(self, command, cwd, timeout=3600):
         import subprocess
         from toolbox import ProxyNetworkActivate
-        logging.info(f'正在执行命令 {command}')
+        logger.info(f'正在执行命令 {command}')
         with ProxyNetworkActivate("Nougat_Download"):
             process = subprocess.Popen(command, shell=False, cwd=cwd, env=os.environ)
         try:
@@ -586,7 +603,7 @@ class nougat_interface():
         except subprocess.TimeoutExpired:
             process.kill()
             stdout, stderr = process.communicate()
-            print("Process timed out!")
+            logger.error("Process timed out!")
             return False
         return True
 

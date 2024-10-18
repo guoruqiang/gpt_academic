@@ -38,6 +38,9 @@ AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-p
                     "gpt-4", "gpt-4-32k", "azure-gpt-4", "glm-4", "glm-4v", "glm-3-turbo",
                     "gemini-1.5-pro", "chatglm3"
                     ]
+
+EMBEDDING_MODEL = "text-embedding-3-small"
+
 # --- --- --- ---
 # P.S. 其他可用的模型还包括
 # AVAIL_LLM_MODELS = [
@@ -54,9 +57,9 @@ AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-p
 #   "yi-34b-chat-0205","yi-34b-chat-200k","yi-large","yi-medium","yi-spark","yi-large-turbo","yi-large-preview",
 # ]
 # --- --- --- ---
-# 此外，您还可以在接入nwafu/vllm/ollama时，
-# 使用"nwafu-*","vllm-*","ollama-*"前缀直接使用非标准方式接入的模型，例如
-# AVAIL_LLM_MODELS = ["nwafu-claude-3-sonnet-20240229(max_token=100000)", "ollama-phi3(max_token=4096)"]
+# 此外，您还可以在接入nwafu/vllm/ollama/Openroute时，
+# 使用"nwafu-*","vllm-*","ollama-*","openrouter-*"前缀直接使用非标准方式接入的模型，例如
+# AVAIL_LLM_MODELS = ["nwafu-claude-3-sonnet-20240229(max_token=100000)", "ollama-phi3(max_token=4096)","openrouter-openai/gpt-4o-mini","openrouter-openai/chatgpt-4o-latest"]
 # --- --- --- ---
 
 
@@ -295,7 +298,7 @@ ARXIV_CACHE_DIR = "gpt_log/arxiv_cache"
 
 # 除了连接OpenAI之外，还有哪些场合允许使用代理，请尽量不要修改
 WHEN_TO_USE_PROXY = ["Download_LLM", "Download_Gradio_Theme", "Connect_Grobid",
-                     "Warmup_Modules", "Nougat_Download", "AutoGen"]
+                     "Warmup_Modules", "Nougat_Download", "AutoGen", "Connect_OpenAI_Embedding"]
 
 
 # 启用插件热加载
