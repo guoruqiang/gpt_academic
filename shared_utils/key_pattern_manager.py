@@ -14,6 +14,7 @@ openai_regex = re.compile(
     r"sk-[a-zA-Z0-9_-]{92}$|" +
     r"sk-proj-[a-zA-Z0-9_-]{48}$|"+
     r"sk-proj-[a-zA-Z0-9_-]{124}$|"+
+    r"sk-proj-[a-zA-Z0-9_-]{156}$|"+ #新版apikey位数不匹配故修改此正则表达式
     r"sess-[a-zA-Z0-9]{40}$"
 )
 def is_openai_api_key(key):
@@ -77,7 +78,8 @@ def select_api_key(keys, llm_model):
     avail_key_list = []
     key_list = keys.split(',')
 
-    if llm_model.startswith('gpt-') or llm_model.startswith('nwafu-') or llm_model.startswith('o1-'):
+    if llm_model.startswith('gpt-') or llm_model.startswith('chatgpt-') or \
+       llm_model.startswith('nwafu-') or llm_model.startswith('o1-'):
         for k in key_list:
             if is_openai_api_key(k): avail_key_list.append(k)
 

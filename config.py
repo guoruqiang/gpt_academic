@@ -309,6 +309,10 @@ PLUGIN_HOT_RELOAD = False
 NUM_CUSTOM_BASIC_BTN = 4
 
 
+# 媒体智能体的服务地址（这是一个huggingface空间，请前往huggingface复制该空间，然后把自己新的空间地址填在这里）
+DAAS_SERVER_URL = "https://hamercity-bbdown.hf.space/stream"
+
+
 
 """
 --------------- 配置关联关系说明 ---------------

@@ -2,7 +2,6 @@ from toolbox import HotReload  # HotReload 的意思是热更新，修改函数�
 from toolbox import trimmed_format_exc
 from loguru import logger
 
-
 def get_crazy_functions():
     from crazy_functions.读文章写摘要 import 读文章写摘要
     from crazy_functions.生成函数注释 import 批量生成函数注释
@@ -17,7 +16,7 @@ def get_crazy_functions():
     from crazy_functions.SourceCode_Analyse import 解析一个前端项目
     from crazy_functions.高级功能函数模板 import 高阶功能模板函数
     from crazy_functions.高级功能函数模板 import Demo_Wrap
-    from crazy_functions.Latex全文润色 import Latex英文润色
+    from crazy_functions.Latex_Project_Polish import Latex英文润色
     from crazy_functions.询问多个大语言模型 import 同时问询
     from crazy_functions.SourceCode_Analyse import 解析一个Lua项目
     from crazy_functions.SourceCode_Analyse import 解析一个CSharp项目
@@ -33,8 +32,8 @@ def get_crazy_functions():
     from crazy_functions.PDF_Translate import 批量翻译PDF文档
     from crazy_functions.谷歌检索小助手 import 谷歌检索小助手
     from crazy_functions.理解PDF文档内容 import 理解PDF文档内容标准文件输入
-    from crazy_functions.Latex全文润色 import Latex中文润色
-    from crazy_functions.Latex全文润色 import Latex英文纠错
+    from crazy_functions.Latex_Project_Polish import Latex中文润色
+    from crazy_functions.Latex_Project_Polish import Latex英文纠错
     from crazy_functions.Markdown_Translate import Markdown中译英
     from crazy_functions.虚空终端 import 虚空终端
     from crazy_functions.生成多种Mermaid图表 import Mermaid_Gen
@@ -49,8 +48,17 @@ def get_crazy_functions():
     from crazy_functions.Image_Generate import 图片生成_DALLE2, 图片生成_DALLE3, 图片修改_DALLE2
     from crazy_functions.Image_Generate_Wrap import ImageGen_Wrap
     from crazy_functions.SourceCode_Comment import 注释Python项目
+    from crazy_functions.SourceCode_Comment_Wrap import SourceCodeComment_Wrap
+    from crazy_functions.VideoResource_GPT import 多媒体任务
 
     function_plugins = {
+        "多媒体智能体": {
+            "Group": "智能体",
+            "Color": "stop",
+            "AsButton": False,
+            "Info": "【仅测试】多媒体任务",
+            "Function": HotReload(多媒体任务),
+        },
         "虚空终端": {
             "Group": "对话|编程|学术|智能体",
             "Color": "stop",
@@ -71,6 +79,7 @@ def get_crazy_functions():
             "AsButton": False,
             "Info": "上传一系列python源文件(或者压缩包), 为这些代码添加docstring | 输入参数为路径",
             "Function": HotReload(注释Python项目),
+            "Class": SourceCodeComment_Wrap,
         },
         "载入对话历史存档（先上传存档或输入路径）": {
             "Group": "对话",
@@ -718,12 +727,6 @@ def get_crazy_functions():
         logger.error("Load function plugin failed")
 
 
-    
-
-
-
-
-
     # try:
     #     from crazy_functions.高级功能函数模板 import 测试图表渲染
     #     function_plugins.update({
@@ -738,19 +741,6 @@ def get_crazy_functions():
     #     logger.error(trimmed_format_exc())
     #     print('Load function plugin failed')
 
-    # try:
-    #     from crazy_functions.chatglm微调工具 import 微调数据集生成
-    #     function_plugins.update({
-    #         "黑盒模型学习: 微调数据集生成 (先上传数据集)": {
-    #             "Color": "stop",
-    #             "AsButton": False,
-    #             "AdvancedArgs": True,
-    #             "ArgsReminder": "针对数据集输入（如 绿帽子*深蓝色衬衫*黑色运动裤）给出指令，例如您可以将以下命令复制到下方: --llm_to_learn=azure-gpt-3.5 --prompt_prefix='根据下面的服装类型提示，想象一个穿着者，对这个人外貌、身处的环境、内心世界、过去经历进行描写。要求：100字以内，用第二人称。' --system_prompt=''",
-    #             "Function": HotReload(微调数据集生成)
-    #         }
-    #     })
-    # except:
-    #     print('Load function plugin failed')
 
     """
     设置默认值:
@@ -770,3 +760,23 @@ def get_crazy_functions():
             function_plugins[name]["Color"] = "secondary"
 
     return function_plugins
+
+
+
+
+def get_multiplex_button_functions():
+    """多路复用主提交按钮的功能映射
+    """
+    return {
+        "常规对话":
+            "",
+
+        "多模型对话": 
+            "询问多个GPT模型", # 映射到上面的 `询问多个GPT模型` 插件
+
+        "智能召回 RAG": 
+            "Rag智能召回", # 映射到上面的 `Rag智能召回` 插件
+
+        "多媒体查询": 
+            "多媒体智能体", # 映射到上面的 `多媒体智能体` 插件
+    }
