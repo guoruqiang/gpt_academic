@@ -159,11 +159,11 @@ CONCURRENT_COUNT = 100
 
 
 # 是否在提交时自动清空输入框
-AUTO_CLEAR_TXT = False
+AUTO_CLEAR_TXT = True
 
 
 # 加一个live2d装饰
-ADD_WAIFU = False
+ADD_WAIFU = True
 
 
 # 设置用户名和密码（不需要修改）（相关功能不稳定，与gradio版本和网络都相关，如果本地使用不建议加这个）
@@ -271,8 +271,9 @@ HUGGINGFACE_ACCESS_TOKEN = "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"
 # GROBID服务器地址（填写多个可以均衡负载），用于高质量地读取PDF文档
 # 获取方法：复制以下空间https://huggingface.co/spaces/qingxu98/grobid，设为public，然后GROBID_URL = "https://(你的hf用户名如qingxu98)-(你的填写的空间名如grobid).hf.space"
 GROBID_URLS = [
-    "http://grobid.nwafu-ai.com","https://ag471782517-grobid2.hf.space","https://ag471782517-grobid3.hf.space",
-    "https://ag471782517-grobid1.hf.space","https://ag471782517-grobid.hf.space",
+    "https://qingxu98-grobid.hf.space","https://qingxu98-grobid2.hf.space","https://qingxu98-grobid3.hf.space",
+    "https://qingxu98-grobid4.hf.space","https://qingxu98-grobid5.hf.space", "https://qingxu98-grobid6.hf.space",
+    "https://qingxu98-grobid7.hf.space", "https://qingxu98-grobid8.hf.space",
 ]
 
 
