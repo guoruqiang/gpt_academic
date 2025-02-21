@@ -85,7 +85,8 @@ class WelcomeMessage {
         this.card_array = [];
         this.static_welcome_message_previous = [];
         this.reflesh_time_interval = 15 * 1000;
-
+        this.update_time_interval = 2 * 1000;
+        this.major_title = "欢迎使用GPT-Academic";
 
         const reflesh_render_status = () => {
             for (let index = 0; index < this.card_array.length; index++) {
@@ -99,16 +100,28 @@ class WelcomeMessage {
 
         // call update when page size change, call this.update when page size change
         window.addEventListener('resize', this.update.bind(this));
+        // add a loop to reflesh cards
+        this.startRefleshCards();
+        this.startAutoUpdate();
     }
 
     begin_render() {
         this.update();
     }
 
+    async startAutoUpdate() {
+        // sleep certain time
+        await new Promise(r => setTimeout(r, this.update_time_interval));
+        this.update();
+    }
+
     async startRefleshCards() {
+        // sleep certain time
         await new Promise(r => setTimeout(r, this.reflesh_time_interval));
-        await this.reflesh_cards();
+        // checkout visible status
         if (this.visible) {
+            // if visible, then reflesh cards
+            await this.reflesh_cards();
             setTimeout(() => {
                 this.startRefleshCards.call(this);
             }, 1);
@@ -129,6 +142,7 @@ class WelcomeMessage {
 
         // combine two lists
         this.static_welcome_message_previous = not_shown_previously.concat(already_shown_previously);
+        this.static_welcome_message_previous = this.static_welcome_message_previous.slice(0, this.max_welcome_card_num);
 
         (async () => {
             // 使用 for...of 循环来处理异步操作
@@ -193,36 +207,38 @@ class WelcomeMessage {
         return array;
     }
 
-    async update() {
-        // console.log('update')
+    async can_display() {
+        // update the card visibility
         const elem_chatbot = document.getElementById('gpt-chatbot');
         const chatbot_top = elem_chatbot.getBoundingClientRect().top;
         const welcome_card_container = document.getElementsByClassName('welcome-card-container')[0];
+        // detect if welcome card overflow
         let welcome_card_overflow = false;
         if (welcome_card_container) {
             const welcome_card_top = welcome_card_container.getBoundingClientRect().top;
             if (welcome_card_top < chatbot_top) {
                 welcome_card_overflow = true;
-                // console.log("welcome_card_overflow");
             }
         }
         var page_width = document.documentElement.clientWidth;
         const width_to_hide_welcome = 1200;
         if (!await this.isChatbotEmpty() || page_width < width_to_hide_welcome || welcome_card_overflow) {
-            if (this.visible) {
-                console.log("remove welcome");
-                this.removeWelcome(); this.visible = false; // this two lines must always be together
-                this.card_array = [];
-                this.static_welcome_message_previous = [];
-            }
+            // cannot display
+            return false;
+        }
+        return true;
+    }
+
+    async update() {
+        const can_display = await this.can_display();
+        if (can_display && !this.visible) {
+            this.showWelcome();
             return;
         }
-        if (this.visible) {
+        if (!can_display && this.visible) {
+            this.removeWelcome();
             return;
         }
-        console.log("show welcome");
-        this.showWelcome(); this.visible = true; // this two lines must always be together
-        this.startRefleshCards();
     }
 
     showCard(message) {
@@ -263,7 +279,7 @@ class WelcomeMessage {
     }
 
     async showWelcome() {
-
+        this.visible = true;
         // 首先，找到想要添加子元素的父元素
         const elem_chatbot = document.getElementById('gpt-chatbot');
 
@@ -289,6 +305,16 @@ class WelcomeMessage {
         });
 
         elem_chatbot.appendChild(welcome_card_container);
+        const can_display = await this.can_display();
+        if (!can_display) {
+            // undo
+            this.visible = false;
+            this.card_array = [];
+            this.static_welcome_message_previous = [];
+            elem_chatbot.removeChild(welcome_card_container);
+            await new Promise(r => setTimeout(r, this.update_time_interval / 2));
+            return;
+        }
 
         // 添加显示动画
         requestAnimationFrame(() => {
@@ -297,16 +323,19 @@ class WelcomeMessage {
     }
 
     async removeWelcome() {
+        this.visible = false;
         // remove welcome-card-container
         const elem_chatbot = document.getElementById('gpt-chatbot');
         const welcome_card_container = document.getElementsByClassName('welcome-card-container')[0];
-        // 添加隐藏动画
+        // begin hide animation
         welcome_card_container.classList.add('hide');
-        // 等待动画结束后再移除元素
         welcome_card_container.addEventListener('transitionend', () => {
             elem_chatbot.removeChild(welcome_card_container);
+            this.card_array = [];
+            this.static_welcome_message_previous = [];
         }, { once: true });
-        const timeout = 600; // 与CSS中transition的时间保持一致(1s)
+        // add a fail safe timeout
+        const timeout = 600; // 与 CSS 中 transition 的时间保持一致(1s)
         setTimeout(() => {
             if (welcome_card_container.parentNode) {
                 elem_chatbot.removeChild(welcome_card_container);

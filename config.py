@@ -13,7 +13,10 @@ API_KEY = "在此处填写APIKEY"    # 可同时填写多个API-KEY，用英文�
 # [step 1-2]>> ( 接入通义 qwen-max ) 接入通义千问在线大模型，api-key获取地址 https://dashscope.console.aliyun.com/
 DASHSCOPE_API_KEY = "" # 阿里灵积云API_KEY
 
-# [step 2]>> 改为True应用代理，如果直接在海外服务器部署，此处不修改；如果使用本地或无地域限制的大模型时，此处也不需要修改
+# [step 1-3]>> ( 接入 deepseek-reasoner, 即 deepseek-r1 ) 深度求索(DeepSeek) API KEY，默认请求地址为"https://api.deepseek.com/v1/chat/completions"
+DEEPSEEK_API_KEY = ""
+
+# [step 2]>> 改为True应用代理。如果使用本地或无地域限制的大模型时，此处不修改；如果直接在海外服务器部署，此处不修改
 USE_PROXY = False
 if USE_PROXY:
     """
@@ -39,7 +42,8 @@ AVAIL_LLM_MODELS = ["qwen-max", "o1-mini", "o1-mini-2024-09-12", "o1", "o1-2024-
                     "gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-4-turbo-2024-04-09",
                     "gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
                     "gpt-4", "gpt-4-32k", "azure-gpt-4", "glm-4", "glm-4v", "glm-3-turbo",
-                    "gemini-1.5-pro", "chatglm3", "chatglm4"
+                    "gemini-1.5-pro", "chatglm3", "chatglm4",
+                    "deepseek-chat", "deepseek-coder", "deepseek-reasoner"
                     ]
 
 EMBEDDING_MODEL = "text-embedding-3-small"
@@ -77,13 +81,38 @@ API_URL_REDIRECT = {}
 
 # 多线程函数插件中，默认允许多少路线程同时访问OpenAI。Free trial users的限制是每分钟3次，Pay-as-you-go users的限制是每分钟3500次
 # 一言以蔽之：免费（5刀）用户填3，OpenAI绑了信用卡的用户可以填 16 或者更高。提高限制请查询：https://platform.openai.com/docs/guides/rate-limits/overview
-DEFAULT_WORKER_NUM = 3
+DEFAULT_WORKER_NUM = 8
 
 
 # 色彩主题, 可选 ["Default", "Chuanhu-Small-and-Beautiful", "High-Contrast"]
 # 更多主题, 请查阅Gradio主题商店: https://huggingface.co/spaces/gradio/theme-gallery 可选 ["Gstaff/Xkcd", "NoCrypt/Miku", ...]
 THEME = "Chuanhu-Small-and-Beautiful"
 AVAIL_THEMES = ["Default", "Chuanhu-Small-and-Beautiful", "High-Contrast", "Gstaff/Xkcd", "NoCrypt/Miku"]
+
+FONT = "Theme-Default-Font"
+AVAIL_FONTS = [
+    "默认值(Theme-Default-Font)", 
+    "宋体(SimSun)",  
+    "黑体(SimHei)",  
+    "楷体(KaiTi)",  
+    "仿宋(FangSong)",  
+    "华文细黑(STHeiti Light)",
+    "华文楷体(STKaiti)",  
+    "华文仿宋(STFangsong)",  
+    "华文宋体(STSong)",  
+    "华文中宋(STZhongsong)",  
+    "华文新魏(STXinwei)",  
+    "华文隶书(STLiti)", 
+    # 备注：以下字体需要网络支持，您可以自定义任意您喜欢的字体，如下所示，需要满足的格式为 "字体昵称(字体英文真名@字体css下载链接)" 
+    "思源宋体(Source Han Serif CN VF@https://chinese-fonts-cdn.deno.dev/packages/syst/dist/SourceHanSerifCN/result.css)",
+    "月星楷(Moon Stars Kai HW@https://chinese-fonts-cdn.deno.dev/packages/moon-stars-kai/dist/MoonStarsKaiHW-Regular/result.css)",
+    "珠圆体(MaokenZhuyuanTi@https://chinese-fonts-cdn.deno.dev/packages/mkzyt/dist/猫啃珠圆体/result.css)",
+    "平方萌萌哒(PING FANG MENG MNEG DA@https://chinese-fonts-cdn.deno.dev/packages/pfmmd/dist/平方萌萌哒/result.css)",
+    "Helvetica",
+    "ui-sans-serif",
+    "sans-serif",
+    "system-ui"
+]
 
 
 # 默认的系统提示词（system prompt）
@@ -237,9 +266,6 @@ MOONSHOT_API_KEY = ""
 # 零一万物(Yi Model) API KEY
 YIMODEL_API_KEY = ""
 
-# 深度求索(DeepSeek) API KEY，默认请求地址为"https://api.deepseek.com/v1/chat/completions"
-DEEPSEEK_API_KEY = ""
-
 
 # 紫东太初大模型 https://ai-maas.wair.ac.cn
 TAICHU_API_KEY = ""
@@ -319,6 +345,8 @@ NUM_CUSTOM_BASIC_BTN = 4
 DAAS_SERVER_URLS = [ f"https://niuziniu-biligpt{i}.hf.space/stream" for i in range(1,5) ]
 
 
+# 在互联网搜索组件中，负责将搜索结果整理成干净的Markdown
+JINA_API_KEY = ""
 
 """
 --------------- 配置关联关系说明 ---------------
