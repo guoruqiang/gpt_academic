@@ -22,7 +22,7 @@ def load_dynamic_theme(THEME):
         theme_declaration = (
             '<h3 align="center" class="small">本站由🎈一只爱跳水的兔子❤搭建，仅供学术使用。</h3>'
             '<h3 style="display: flex; justify-content: center; gap: 10px;">'
-            '<a href="https://gpt.nwafu-ai.me" target="_blank" style="text-align: center; text-decoration: none;">🧪官网主页</a>'
+            '<a href="https://gpt.nwafu-ai.cn" target="_blank" style="text-align: center; text-decoration: none;">🧪官网主页</a>'
             '<a href="http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=yfptzEImDm0f-cJY2WXF5mkT3Ak0BPHC&authKey=IxpiZlQvPeBeWCgFbLq5z92%2FhmkgqLS5oviMdJRdnoDIWqMRjQ8%2BAYEMKUHJeO3Y&noverify=0&group_code=923014731" target="_blank" style="text-align: center; text-decoration: none;">🔑反馈问题</a>'
             '<a href="https://blog.nwafu-ai.cn/archives/1705730973556" target="_blank" style="text-align: center; text-decoration: none;">📝查看教程</a>'
             '</h3>'
