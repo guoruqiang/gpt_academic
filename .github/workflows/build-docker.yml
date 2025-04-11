@@ -1,5 +1,4 @@
-name: build-with-latex
-
+name: build-docker
 on:
   push:
     branches:
