@@ -50,6 +50,9 @@ def get_crazy_functions():
     from crazy_functions.SourceCode_Comment import 注释Python项目
     from crazy_functions.SourceCode_Comment_Wrap import SourceCodeComment_Wrap
     from crazy_functions.VideoResource_GPT import 多媒体任务
+    from crazy_functions.Document_Conversation import 批量文件询问
+    from crazy_functions.Document_Conversation_Wrap import Document_Conversation_Wrap
+
 
     function_plugins = {
         "多媒体智能体": {
@@ -113,7 +116,7 @@ def get_crazy_functions():
             "Group": "学术",
             "Color": "stop",
             "AsButton": True,
-            "Info": "Arixv论文精细翻译 | 输入参数arxiv论文的ID，比如1812.10695",
+            "Info": "ArXiv论文精细翻译 | 输入参数arxiv论文的ID，比如1812.10695",
             "Function": HotReload(Latex翻译中文并重新编译PDF),  # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
             "Class": Arxiv_Localize,    # 新一代插件需要注册Class
         },
@@ -352,7 +355,7 @@ def get_crazy_functions():
             "ArgsReminder": r"如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 "
                             r"例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: "
                             r'If the term "agent" is used in this section, it should be translated to "智能体". ',
-            "Info": "Arixv论文精细翻译 | 输入参数arxiv论文的ID，比如1812.10695",
+            "Info": "ArXiv论文精细翻译 | 输入参数arxiv论文的ID，比如1812.10695",
             "Function": HotReload(Latex翻译中文并重新编译PDF),  # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
             "Class": Arxiv_Localize,    # 新一代插件需要注册Class
         },
@@ -378,7 +381,16 @@ def get_crazy_functions():
             "Info": "PDF翻译中文，并重新编译PDF | 输入参数为路径",
             "Function": HotReload(PDF翻译中文并重新编译PDF),   # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
             "Class": PDF_Localize   # 新一代插件需要注册Class
-        }
+        },
+        "批量文件询问 (支持自定义总结各种文件)": {
+            "Group": "学术",
+            "Color": "stop",
+            "AsButton": False,
+            "AdvancedArgs": False,
+            "Info": "先上传文件，点击此按钮，进行提问",
+            "Function": HotReload(批量文件询问),
+            "Class": Document_Conversation_Wrap,
+        },
     }
 
     function_plugins.update(
@@ -414,8 +426,6 @@ def get_crazy_functions():
 
 
 
-
-    # -=--=- 尚未充分测试的实验性插件 & 需要额外依赖的插件 -=--=-
     try:
         from crazy_functions.下载arxiv论文翻译摘要 import 下载arxiv论文并翻译摘要
 
@@ -434,36 +444,6 @@ def get_crazy_functions():
         logger.error(trimmed_format_exc())
         logger.error("Load function plugin failed")
 
-    # try:
-    #     from crazy_functions.联网的ChatGPT import 连接网络回答问题
-
-    #     function_plugins.update(
-    #         {
-    #             "连接网络回答问题（输入问题后点击该插件，需要访问谷歌）": {
-    #                 "Group": "对话",
-    #                 "Color": "stop",
-    #                 "AsButton": False,  # 加入下拉菜单中
-    #                 # "Info": "连接网络回答问题（需要访问谷歌）| 输入参数是一个问题",
-    #                 "Function": HotReload(连接网络回答问题),
-    #             }
-    #         }
-    #     )
-    #     from crazy_functions.联网的ChatGPT_bing版 import 连接bing搜索回答问题
-
-    #     function_plugins.update(
-    #         {
-    #             "连接网络回答问题（中文Bing版，输入问题后点击该插件）": {
-    #                 "Group": "对话",
-    #                 "Color": "stop",
-    #                 "AsButton": False,  # 加入下拉菜单中
-    #                 "Info": "连接网络回答问题（需要访问中文Bing）| 输入参数是一个问题",
-    #                 "Function": HotReload(连接bing搜索回答问题),
-    #             }
-    #         }
-    #     )
-    # except:
-    #     logger.error(trimmed_format_exc())
-    #     logger.error("Load function plugin failed")
 
     try:
         from crazy_functions.SourceCode_Analyse import 解析任意code项目
@@ -674,22 +654,21 @@ def get_crazy_functions():
         logger.error(trimmed_format_exc())
         logger.error("Load function plugin failed")
 
-    try:
-        from crazy_functions.多智能体 import 多智能体终端
-
-        function_plugins.update(
-            {
-                "AutoGen多智能体终端（仅供测试）": {
-                    "Group": "智能体",
-                    "Color": "stop",
-                    "AsButton": False,
-                    "Function": HotReload(多智能体终端),
-                }
-            }
-        )
-    except:
-        logger.error(trimmed_format_exc())
-        logger.error("Load function plugin failed")
+    # try:
+    #     from crazy_functions.多智能体 import 多智能体终端
+    #     function_plugins.update(
+    #         {
+    #             "AutoGen多智能体终端（仅供测试）": {
+    #                 "Group": "智能体",
+    #                 "Color": "stop",
+    #                 "AsButton": False,
+    #                 "Function": HotReload(多智能体终端),
+    #             }
+    #         }
+    #     )
+    # except:
+    #     logger.error(trimmed_format_exc())
+    #     logger.error("Load function plugin failed")
 
     try:
         from crazy_functions.互动小游戏 import 随机小游戏
@@ -725,6 +704,44 @@ def get_crazy_functions():
     except:
         logger.error(trimmed_format_exc())
         logger.error("Load function plugin failed")
+
+    # try:
+    #     from crazy_functions.Document_Optimize import 自定义智能文档处理
+    #     function_plugins.update(
+    #         {
+    #             "一键处理文档（支持自定义全文润色、降重等）": {
+    #                 "Group": "学术",
+    #                 "Color": "stop",
+    #                 "AsButton": False,
+    #                 "AdvancedArgs": True,
+    #                 "ArgsReminder": "请输入处理指令和要求（可以详细描述），如：请帮我润色文本，要求幽默点。默认调用润色指令。",
+    #                 "Info": "保留文档结构，智能处理文档内容 | 输入参数为文件路径",
+    #                 "Function": HotReload(自定义智能文档处理)
+    #             },
+    #         }
+    #     )
+    # except:
+    #     logger.error(trimmed_format_exc())
+    #     logger.error("Load function plugin failed")
+
+
+
+    # try:
+    #     from crazy_functions.Paper_Reading import 快速论文解读
+    #     function_plugins.update(
+    #         {
+    #             "速读论文": {
+    #                 "Group": "学术",
+    #                 "Color": "stop",
+    #                 "AsButton": False,
+    #                 "Info": "上传一篇论文进行快速分析和解读 |  输入参数为论文路径或DOI/arXiv ID",
+    #                 "Function": HotReload(快速论文解读),
+    #             },
+    #         }
+    #     )
+    # except:
+    #     logger.error(trimmed_format_exc())
+    #     logger.error("Load function plugin failed")
 
 
     # try:
@@ -771,12 +788,15 @@ def get_multiplex_button_functions():
         "常规对话":
             "",
 
-        "多模型对话": 
+        "查互联网后回答":
+            "查互联网后回答",
+
+        "多模型对话":
             "询问多个GPT模型", # 映射到上面的 `询问多个GPT模型` 插件
 
-        "智能召回 RAG": 
+        "智能召回 RAG":
             "Rag智能召回", # 映射到上面的 `Rag智能召回` 插件
 
-        "多媒体查询": 
+        "多媒体查询":
             "多媒体智能体", # 映射到上面的 `多媒体智能体` 插件
     }

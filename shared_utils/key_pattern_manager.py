@@ -45,6 +45,13 @@ def is_cohere_api_key(key):
 
 
 def is_any_api_key(key):
+    # key 一般只包含字母、数字、下划线、逗号、中划线
+    if not re.match(r"^[a-zA-Z0-9_\-,]+$", key):
+        # 如果配置了 CUSTOM_API_KEY_PATTERN，再检查以下以免误杀
+        if CUSTOM_API_KEY_PATTERN := get_conf('CUSTOM_API_KEY_PATTERN'):
+            return bool(re.match(CUSTOM_API_KEY_PATTERN, key))
+        return False
+
     if ',' in key:
         keys = key.split(',')
         for k in keys:
@@ -72,6 +79,14 @@ def what_keys(keys):
 
     return f"检测到： OpenAI Key {avail_key_list['OpenAI Key']} 个, Azure Key {avail_key_list['Azure Key']} 个, API2D Key {avail_key_list['API2D Key']} 个"
 
+def is_o_family_for_openai(llm_model):
+    if not llm_model.startswith('o'):
+        return False
+    if llm_model in ['o1', 'o2', 'o3', 'o4', 'o5', 'o6', 'o7', 'o8']:
+        return True
+    if llm_model[:3] in ['o1-', 'o2-', 'o3-', 'o4-', 'o5-', 'o6-', 'o7-', 'o8-']:
+        return True
+    return False
 
 def select_api_key(keys, llm_model):
     import random
@@ -79,7 +94,7 @@ def select_api_key(keys, llm_model):
     key_list = keys.split(',')
 
     if llm_model.startswith('gpt-') or llm_model.startswith('chatgpt-') or \
-       llm_model.startswith('one-api-') or llm_model == 'o1' or llm_model.startswith('o1-'):
+       llm_model.startswith('one-api-') or is_o_family_for_openai(llm_model):
         for k in key_list:
             if is_openai_api_key(k): avail_key_list.append(k)
 

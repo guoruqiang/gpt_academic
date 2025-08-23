@@ -259,7 +259,24 @@ function cancel_loading_status() {
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 //  第 2 部分: 复制按钮
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+// 解压缩函数
+function decompressString(compressedString) {
+    // 第1步：Base64解码
+    const binaryString = atob(compressedString);
 
+    // 第2步：将二进制字符串转换为Uint8Array
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+
+    // 第3步：使用DecompressionStream (基于Web Streams API)进行gzip解压缩
+    const ds = new DecompressionStream('gzip');
+    const decompressedStream = new Response(new Blob([bytes])).body.pipeThrough(ds);
+
+    // 第4步：获取解压后的数据并转换为字符串
+    return new Response(decompressedStream).text();
+}
 
 var allow_auto_read_continously = true;
 var allow_auto_read_tts_flag = false;
@@ -272,7 +289,7 @@ function addCopyButton(botElement, index, is_last_in_arr) {
     const audioIcon = '<span><svg t="1713628577799" fill="currentColor" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4587" width=".9em" height=".9em"><path d="M113.7664 540.4672c0-219.9552 178.2784-398.2336 398.2336-398.2336S910.2336 320.512 910.2336 540.4672v284.4672c0 31.4368-25.4976 56.9344-56.9344 56.9344h-56.9344c-31.4368 0-56.9344-25.4976-56.9344-56.9344V597.2992c0-31.4368 25.4976-56.9344 56.9344-56.9344h56.9344c0-188.5184-152.7808-341.2992-341.2992-341.2992S170.7008 351.9488 170.7008 540.4672h56.9344c31.4368 0 56.9344 25.4976 56.9344 56.9344v227.5328c0 31.4368-25.4976 56.9344-56.9344 56.9344h-56.9344c-31.4368 0-56.9344-25.4976-56.9344-56.9344V540.4672z" p-id="4588"></path></svg></span>';
     // const cancelAudioIcon = '<span><svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height=".8em" width=".8em" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></span>';
 
-    // 此功能没准备好
+    // audio functionality
     if (allow_auto_read_continously && is_last_in_arr && allow_auto_read_tts_flag) {
         process_latest_text_output(botElement.innerText, index);
     }
@@ -283,19 +300,21 @@ function addCopyButton(botElement, index, is_last_in_arr) {
         return;
     }
 
-    var copyButton = document.createElement('button');
-    copyButton.classList.add('copy-bot-btn');
-    copyButton.setAttribute('aria-label', 'Copy');
-    copyButton.innerHTML = copyIcon;
-    copyButton.addEventListener('click', async () => {
-        const textToCopy = botElement.innerText;
+    // 原始文本拷贝
+    var copyButtonOrig = document.createElement('button');
+    copyButtonOrig.classList.add('copy-bot-btn');
+    copyButtonOrig.setAttribute('aria-label', 'Copy');
+    copyButtonOrig.innerHTML = copyIcon;
+    copyButtonOrig.addEventListener('click', async () => {
         try {
+            const base64gzipcode = botElement.getElementsByClassName('raw_text')[0].innerText;
+            const textToCopy = await decompressString(base64gzipcode);
             // push_text_to_audio(textToCopy).catch(console.error);
             if ("clipboard" in navigator) {
                 await navigator.clipboard.writeText(textToCopy);
-                copyButton.innerHTML = copiedIcon;
+                copyButtonOrig.innerHTML = copiedIcon;
                 setTimeout(() => {
-                    copyButton.innerHTML = copyIcon;
+                    copyButtonOrig.innerHTML = copyIcon;
                 }, 1500);
             } else {
                 const textArea = document.createElement("textarea");
@@ -304,9 +323,9 @@ function addCopyButton(botElement, index, is_last_in_arr) {
                 textArea.select();
                 try {
                     document.execCommand('copy');
-                    copyButton.innerHTML = copiedIcon;
+                    copyButtonOrig.innerHTML = copiedIcon;
                     setTimeout(() => {
-                        copyButton.innerHTML = copyIcon;
+                        copyButtonOrig.innerHTML = copyIcon;
                     }, 1500);
                 } catch (error) {
                     console.error("Copy failed: ", error);
@@ -345,7 +364,8 @@ function addCopyButton(botElement, index, is_last_in_arr) {
 
     var messageBtnColumn = document.createElement('div');
     messageBtnColumn.classList.add('message-btn-row');
-    messageBtnColumn.appendChild(copyButton);
+    // messageBtnColumn.appendChild(copyButton);
+    messageBtnColumn.appendChild(copyButtonOrig);
     if (enable_tts) {
         messageBtnColumn.appendChild(audioButton);
     }
@@ -381,7 +401,6 @@ function do_something_but_not_too_frequently(min_interval, func) {
 
 
 function chatbotContentChanged(attempt = 1, force = false) {
-    // https://github.com/GaiZhenbiao/ChuanhuChatGPT/tree/main/web_assets/javascript
     for (var i = 0; i < attempt; i++) {
         setTimeout(() => {
             const messages = gradioApp().querySelectorAll('#gpt-chatbot .message-wrap .message.bot');
@@ -392,7 +411,11 @@ function chatbotContentChanged(attempt = 1, force = false) {
                 // Now pass both the message element and the is_last_in_arr boolean to addCopyButton
                 addCopyButton(message, index, is_last_in_arr);
 
-                save_conversation_history();
+                // if last message, add stop btn link
+                addStopButton(message, index, is_last_in_arr);
+
+                // save_conversation_history
+                save_conversation_history_slow_down();
             });
             // gradioApp().querySelectorAll('#gpt-chatbot .message-wrap .message.bot').forEach(addCopyButton);
         }, i === 0 ? 0 : 200);
@@ -401,6 +424,79 @@ function chatbotContentChanged(attempt = 1, force = false) {
 
 }
 
+function addStopButton(botElement, index, is_last_in_arr) {
+    function is_generating() {
+        var statePanelElement = document.getElementById("state-panel");
+        var generatingElement = statePanelElement.querySelector(".generating");
+        if (generatingElement) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    function on_stop_btn_click() {
+        let stopButton = document.getElementById("elem_stop");
+        stopButton.click();
+    }
+    function remove_stop_generate_btn(messageTailElement) {
+        // remove all child elements of messageTailElement
+        while (messageTailElement.firstChild) {
+            messageTailElement.removeChild(messageTailElement.firstChild);
+        }
+        messageTailElement.style.display = 'none';
+        messageTailElement.classList.add('removed');
+    }
+    function add_stop_generate_btn() {
+        // write here: add a beautiful stop btn `bottomElement` as child, when clicked execute on_stop_btn_click
+        console.log("get_gradio_component")
+        const bottomElement = document.createElement('button');
+        bottomElement.className = 'ant-btn ant-btn-primary';
+        bottomElement.innerHTML = `
+            <span class="ant-btn-icon">
+                <svg viewBox="64 64 896 896" focusable="false" data-icon="sync" width="1em" height="1em" fill="currentColor" aria-hidden="true" class="anticon anticon-sync anticon-spin">
+                <path d="M168 504.2c1-43.7 10-86.1 26.9-126 17.3-41 42.1-77.7 73.7-109.4S337 212.3 378 195c42.4-17.9 87.4-27 133.9-27s91.5 9.1 133.8 27A341.5 341.5 0 01755 268.8c9.9 9.9 19.2 20.4 27.8 31.4l-60.2 47a8 8 0 003 14.1l175.7 43c5 1.2 9.9-2.6 9.9-7.7l.8-180.9c0-6.7-7.7-10.5-12.9-6.3l-56.4 44.1C765.8 155.1 646.2 92 511.8 92 282.7 92 96.3 275.6 92 503.8a8 8 0 008 8.2h60c4.4 0 7.9-3.5 8-7.8zm756 7.8h-60c-4.4 0-7.9 3.5-8 7.8-1 43.7-10 86.1-26.9 126-17.3 41-42.1 77.8-73.7 109.4A342.45 342.45 0 01512.1 856a342.24 342.24 0 01-243.2-100.8c-9.9-9.9-19.2-20.4-27.8-31.4l60.2-47a8 8 0 00-3-14.1l-175.7-43c-5-1.2-9.9 2.6-9.9 7.7l-.7 181c0 6.7 7.7 10.5 12.9 6.3l56.4-44.1C258.2 868.9 377.8 932 512.2 932c229.2 0 415.5-183.7 419.8-411.8a8 8 0 00-8-8.2z"></path>
+                </svg>
+            </span>
+            <span>终止</span>
+        `;
+        bottomElement.classList.add('message_tail_stop');
+        bottomElement.addEventListener('click', on_stop_btn_click);
+        messageTailElement.appendChild(bottomElement);
+    }
+
+    // find a sub element of class `message_tail`
+    const messageTailElement = botElement.querySelector('.message_tail');
+    // if not is_last_in_arr, hide this elem (display none)
+    if (!messageTailElement) {
+        return;
+    }
+    if (messageTailElement.classList.contains('removed')) {
+        return;
+    }
+    if (!is_last_in_arr) {
+        remove_stop_generate_btn(messageTailElement);
+        return;
+    }
+    messageTailElement.style.display = 'flex';
+    const messageTailStopElem = messageTailElement.querySelector('.message_tail_stop');
+    if(!is_generating()) {
+        setTimeout(() => {
+            if(!is_generating()) {
+                remove_stop_generate_btn(messageTailElement);
+                return;
+            } else {
+                if (!messageTailStopElem) {
+                    add_stop_generate_btn()
+                }
+            }
+        }, 500);
+    } else {
+        if (!messageTailStopElem) {
+            add_stop_generate_btn()
+        }
+    }
+
+}
 
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -749,10 +845,24 @@ function minor_ui_adjustment() {
     var bar_btn_width = [];
     // 自动隐藏超出范围的toolbar按钮
     function auto_hide_toolbar() {
-        var qq = document.getElementById('tooltip');
-        var tab_nav = qq.getElementsByClassName('tab-nav');
+        // if chatbot hit upper page boarder, hide all
+        const elem_chatbot = document.getElementById('gpt-chatbot');
+        const chatbot_top = elem_chatbot.getBoundingClientRect().top;
+        var tooltip = document.getElementById('tooltip');
+        var tab_nav = tooltip.getElementsByClassName('tab-nav')[0];
+
+        // 20 px 大概是一个字的高度
+        if (chatbot_top < 20) {
+            // tab_nav.style.display = 'none';
+            if (tab_nav.classList.contains('visible')) {tab_nav.classList.remove('visible');}
+            if (!tab_nav.classList.contains('hidden')) {tab_nav.classList.add('hidden');}
+            return;
+        }
+        if (tab_nav.classList.contains('hidden')) {tab_nav.classList.remove('hidden');}
+        if (!tab_nav.classList.contains('visible')) {tab_nav.classList.add('visible');}
+        // tab_nav.style.display = '';
         if (tab_nav.length == 0) { return; }
-        var btn_list = tab_nav[0].getElementsByTagName('button')
+        var btn_list = tab_nav.getElementsByTagName('button')
         if (btn_list.length == 0) { return; }
         // 获取页面宽度
         var page_width = document.documentElement.clientWidth;
@@ -960,11 +1070,11 @@ function update_conversation_metadata() {
         const conversationId = generateUUID();
         console.log('Create conversation ID:', conversationId);
         const timestamp = new Date().toISOString();
-        const conversationData = {
+        const conversationMetaData = {
             id: conversationId,
             timestamp: timestamp
         };
-        setCookie("conversation_metadata", JSON.stringify(conversationData), 2);
+        localStorage.setItem("conversation_metadata", JSON.stringify(conversationMetaData));
     } catch (e) {
         console.error('Error in updating conversation metadata:', e);
     }
@@ -983,11 +1093,11 @@ function generatePreview(conversation, timestamp, maxLength = 100) {
 }
 
 async function save_conversation_history() {
-    // 505030475
+
     let chatbot = await get_data_from_gradio_component('gpt-chatbot');
     let history = await get_data_from_gradio_component('history-ng');
-    let conversation_metadata = getCookie("conversation_metadata");
     let conversation = {};
+    let conversation_metadata = localStorage.getItem("conversation_metadata");
     try {
         conversation_metadata = JSON.parse(conversation_metadata);
         conversation = {
@@ -999,8 +1109,7 @@ async function save_conversation_history() {
             preview: generatePreview(JSON.parse(history), conversation_metadata.timestamp)
         };
     } catch (e) {
-        console.log(history);
-        console.error('Conversation metadata parse error');
+        // console.error('Conversation metadata parse error, recreate conversation metadata');
         update_conversation_metadata();
         return;
     }
@@ -1034,6 +1143,13 @@ async function save_conversation_history() {
         return timeB - timeA;
     });
 
+    const max_chat_preserve = 10;
+
+    if (conversation_history.length >= max_chat_preserve + 1) {
+        toast_push('对话时间线记录已满，正在移除最早的对话记录。您也可以点击左侧的记录点进行手动清理。', 3000);
+        conversation_history = conversation_history.slice(0, max_chat_preserve);
+    }
+
     // Save back to local storage
     try {
         localStorage.setItem('conversation_history', JSON.stringify(conversation_history));
@@ -1048,27 +1164,37 @@ async function save_conversation_history() {
     }
 }
 
+save_conversation_history_slow_down = do_something_but_not_too_frequently(300, save_conversation_history);
 
 function restore_chat_from_local_storage(event) {
     let conversation = event.detail;
     push_data_to_gradio_component(conversation.conversation, "gpt-chatbot", "obj");
     push_data_to_gradio_component(conversation.history, "history-ng", "obj");
-    // console.log("restore_chat_from_local_storage", conversation);
-
-    // Create a conversation UUID and timestamp
     const conversationId = conversation.id;
     const timestamp = conversation.timestamp;
     const conversationData = {
         id: conversationId,
         timestamp: timestamp
     };
-    // Save to cookie
-    setCookie("conversation_metadata", JSON.stringify(conversationData), 2);
-    // read from cookie
-    let conversation_metadata = getCookie("conversation_metadata");
-
+    localStorage.setItem("conversation_metadata", JSON.stringify(conversationData));
 }
 
+async function clear_conversation(a, b, c) {
+    await save_conversation_history();
+    update_conversation_metadata();
+    let stopButton = document.getElementById("elem_stop");
+    stopButton.click();
+    // Save back to local storage
+    try {
+        const EVENT_NAME = "gptac_reset_btn_clicked";
+        window.dispatchEvent(
+            new CustomEvent(EVENT_NAME, {
+                detail: ""
+            })
+        );
+    } catch (e) {}
+    return reset_conversation(a, b);
+}
 
 function clear_conversation(a, b, c) {
     update_conversation_metadata();
@@ -1080,39 +1206,7 @@ function clear_conversation(a, b, c) {
 
 
 function reset_conversation(a, b) {
-    // console.log("js_code_reset");
-    a = btoa(unescape(encodeURIComponent(JSON.stringify(a))));
-    localStorage.setItem("js_previous_chat_cookie", a);
-    b = btoa(unescape(encodeURIComponent(JSON.stringify(b))));
-    localStorage.setItem("js_previous_history_cookie", b);
-    // gen_restore_btn();
     return [[], [], "已重置"];
-}
-
-
-// clear -> 将 history 缓存至 history_cache -> 点击复原 -> restore_previous_chat() -> 触发elem_update_history -> 读取 history_cache
-function restore_previous_chat() {
-    // console.log("restore_previous_chat");
-    let chat = localStorage.getItem("js_previous_chat_cookie");
-    chat = JSON.parse(decodeURIComponent(escape(atob(chat))));
-    push_data_to_gradio_component(chat, "gpt-chatbot", "obj");
-    let history = localStorage.getItem("js_previous_history_cookie");
-    history = JSON.parse(decodeURIComponent(escape(atob(history))));
-    push_data_to_gradio_component(history, "history-ng", "obj");
-    // document.querySelector("#elem_update_history").click(); // in order to call set_history_gr_state, and send history state to server
-}
-
-
-// clear -> 将 history 缓存至 history_cache -> 点击复原 -> restore_previous_chat() -> 触发elem_update_history -> 读取 history_cache
-function restore_previous_chat() {
-    // console.log("restore_previous_chat");
-    let chat = getCookie("js_previous_chat_cookie");
-    chat = JSON.parse(decodeURIComponent(escape(atob(chat))));
-    push_data_to_gradio_component(chat, "gpt-chatbot", "obj");
-    let history = getCookie("js_previous_history_cookie");
-    history = JSON.parse(decodeURIComponent(escape(atob(history))));
-    push_data_to_gradio_component(history, "history-ng", "obj");
-    // document.querySelector("#elem_update_history").click(); // in order to call set_history_gr_state, and send history state to server
 }
 
 

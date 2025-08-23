@@ -7,13 +7,16 @@
     Configuration reading priority: environment variable > config_private.py > config.py
 """
 
-# [step 1-1]>> ( 接入GPT等模型 ) API_KEY = "sk-123456789xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx123456789"。极少数情况下，还需要填写组织（格式如org-123456789abcdefghijklmno的），请向下翻，找 API_ORG 设置项
+# [step 1-1]>> ( 接入OpenAI模型家族 ) API_KEY = "sk-123456789xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx123456789"。极少数情况下，还需要填写组织（格式如org-123456789abcdefghijklmno的），请向下翻，找 API_ORG 设置项
 API_KEY = "在此处填写APIKEY"    # 可同时填写多个API-KEY，用英文逗号分割，例如API_KEY = "sk-openaikey1,sk-openaikey2,fkxxxx-api2dkey3,azure-apikey4"
 
-# [step 1-2]>> ( 接入通义 qwen-max ) 接入通义千问在线大模型，api-key获取地址 https://dashscope.console.aliyun.com/
-DASHSCOPE_API_KEY = "" # 阿里灵积云API_KEY
+# [step 1-2]>> ( 强烈推荐！接入通义家族 & 大模型服务平台百炼 ) 接入通义千问在线大模型，api-key获取地址 https://dashscope.console.aliyun.com/
+DASHSCOPE_API_KEY = "" # 阿里灵积云API_KEY（用于接入qwen-max，dashscope-qwen3-14b，dashscope-deepseek-r1等）
 
-# [step 2]>> 改为True应用代理，如果直接在海外服务器部署，此处不修改；如果使用本地或无地域限制的大模型时，此处也不需要修改
+# [step 1-3]>> ( 接入 deepseek-reasoner, 即 deepseek-r1 ) 深度求索(DeepSeek) API KEY，默认请求地址为"https://api.deepseek.com/v1/chat/completions"
+DEEPSEEK_API_KEY = ""
+
+# [step 2]>> 改为True应用代理。如果使用本地或无地域限制的大模型时，此处不修改；如果直接在海外服务器部署，此处不修改
 USE_PROXY = False
 if USE_PROXY:
     """
@@ -39,7 +42,11 @@ AVAIL_LLM_MODELS = ["qwen-max", "o1-mini", "o1-mini-2024-09-12", "o1", "o1-2024-
                     "gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-4-turbo-2024-04-09",
                     "gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
                     "gpt-4", "gpt-4-32k", "azure-gpt-4", "glm-4", "glm-4v", "glm-3-turbo",
-                    "gemini-1.5-pro", "chatglm3", "chatglm4"
+                    "gemini-1.5-pro", "chatglm3", "chatglm4",
+                    "deepseek-chat", "deepseek-coder", "deepseek-reasoner",
+                    "volcengine-deepseek-r1-250120", "volcengine-deepseek-v3-241226",
+                    "dashscope-deepseek-r1", "dashscope-deepseek-v3",
+                    "dashscope-qwen3-14b", "dashscope-qwen3-235b-a22b", "dashscope-qwen3-32b",
                     ]
 
 EMBEDDING_MODEL = "text-embedding-3-small"
@@ -77,13 +84,38 @@ API_URL_REDIRECT = {}
 
 # 多线程函数插件中，默认允许多少路线程同时访问OpenAI。Free trial users的限制是每分钟3次，Pay-as-you-go users的限制是每分钟3500次
 # 一言以蔽之：免费（5刀）用户填3，OpenAI绑了信用卡的用户可以填 16 或者更高。提高限制请查询：https://platform.openai.com/docs/guides/rate-limits/overview
-DEFAULT_WORKER_NUM = 3
+DEFAULT_WORKER_NUM = 8
 
 
 # 色彩主题, 可选 ["Default", "Chuanhu-Small-and-Beautiful", "High-Contrast"]
 # 更多主题, 请查阅Gradio主题商店: https://huggingface.co/spaces/gradio/theme-gallery 可选 ["Gstaff/Xkcd", "NoCrypt/Miku", ...]
 THEME = "Default"
 AVAIL_THEMES = ["Default", "Chuanhu-Small-and-Beautiful", "High-Contrast", "Gstaff/Xkcd", "NoCrypt/Miku"]
+
+FONT = "Theme-Default-Font"
+AVAIL_FONTS = [
+    "默认值(Theme-Default-Font)",
+    "宋体(SimSun)",
+    "黑体(SimHei)",
+    "楷体(KaiTi)",
+    "仿宋(FangSong)",
+    "华文细黑(STHeiti Light)",
+    "华文楷体(STKaiti)",
+    "华文仿宋(STFangsong)",
+    "华文宋体(STSong)",
+    "华文中宋(STZhongsong)",
+    "华文新魏(STXinwei)",
+    "华文隶书(STLiti)",
+    # 备注：以下字体需要网络支持，您可以自定义任意您喜欢的字体，如下所示，需要满足的格式为 "字体昵称(字体英文真名@字体css下载链接)"
+    "思源宋体(Source Han Serif CN VF@https://chinese-fonts-cdn.deno.dev/packages/syst/dist/SourceHanSerifCN/result.css)",
+    "月星楷(Moon Stars Kai HW@https://chinese-fonts-cdn.deno.dev/packages/moon-stars-kai/dist/MoonStarsKaiHW-Regular/result.css)",
+    "珠圆体(MaokenZhuyuanTi@https://chinese-fonts-cdn.deno.dev/packages/mkzyt/dist/猫啃珠圆体/result.css)",
+    "平方萌萌哒(PING FANG MENG MNEG DA@https://chinese-fonts-cdn.deno.dev/packages/pfmmd/dist/平方萌萌哒/result.css)",
+    "Helvetica",
+    "ui-sans-serif",
+    "sans-serif",
+    "system-ui"
+]
 
 
 # 默认的系统提示词（system prompt）
@@ -237,8 +269,9 @@ MOONSHOT_API_KEY = ""
 # 零一万物(Yi Model) API KEY
 YIMODEL_API_KEY = ""
 
-# 深度求索(DeepSeek) API KEY，默认请求地址为"https://api.deepseek.com/v1/chat/completions"
-DEEPSEEK_API_KEY = ""
+
+# 接入火山引擎的在线大模型)，api-key获取地址 https://console.volcengine.com/ark/region:ark+cn-beijing/endpoint
+ARK_API_KEY = "00000000-0000-0000-0000-000000000000" # 火山引擎 API KEY
 
 
 # 紫东太初大模型 https://ai-maas.wair.ac.cn
@@ -317,6 +350,23 @@ NUM_CUSTOM_BASIC_BTN = 4
 # 媒体智能体的服务地址（这是一个huggingface空间，请前往huggingface复制该空间，然后把自己新的空间地址填在这里）
 DAAS_SERVER_URLS = [ f"https://niuziniu-biligpt{i}.hf.space/stream" for i in range(1,5) ]
 
+
+# 在互联网搜索组件中，负责将搜索结果整理成干净的Markdown
+JINA_API_KEY = ""
+
+
+# SEMANTIC SCHOLAR API KEY
+SEMANTIC_SCHOLAR_KEY = ""
+
+
+# 是否自动裁剪上下文长度（是否启动，默认不启动）
+AUTO_CONTEXT_CLIP_ENABLE = False
+# 目标裁剪上下文的token长度（如果超过这个长度，则会自动裁剪）
+AUTO_CONTEXT_CLIP_TRIGGER_TOKEN_LEN = 30*1000
+# 无条件丢弃x以上的轮数
+AUTO_CONTEXT_MAX_ROUND = 64
+# 在裁剪上下文时，倒数第x次对话能“最多”保留的上下文token的比例占 AUTO_CONTEXT_CLIP_TRIGGER_TOKEN_LEN 的多少
+AUTO_CONTEXT_MAX_CLIP_RATIO = [0.80, 0.60, 0.45, 0.25, 0.20, 0.18, 0.16, 0.14, 0.12, 0.10, 0.08, 0.07, 0.06, 0.05, 0.04, 0.03, 0.02, 0.01]
 
 
 """
