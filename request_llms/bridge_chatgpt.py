@@ -185,7 +185,7 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], 
                 raise ConnectionAbortedError("正常结束，但显示Token不足，导致输出不完整，请削减单次输入的文本量。")
             else:
                 raise RuntimeError("OpenAI拒绝了请求：" + error_msg)
-        if ('data: [DONE]' in chunk_decoded): break # api2d & one-api 正常完成
+        if ('data: [DONE]' in chunk_decoded): break # api2d & nwafu 正常完成
         # 提前读取一些信息 （用于判断异常）
         if has_choices and not choice_valid:
             # 一些垃圾第三方接口的出现这样的错误
@@ -356,7 +356,7 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
                     if ('data: [DONE]' not in chunk_decoded) and len(chunk_decoded) > 0 and (chunkjson is None):
                         # 传递进来一些奇怪的东西
                         raise ValueError(f'无法读取以下数据，请检查配置。\n\n{chunk_decoded}')
-                    # 前者是API2D & One-API的结束条件，后者是OPENAI的结束条件
+                    # 前者是API2D & nwafu的结束条件，后者是OPENAI的结束条件
                     one_api_terminate = ('data: [DONE]' in chunk_decoded)
                     openai_terminate = (has_choices) and (len(chunkjson['choices'][0]["delta"]) == 0)
                     if one_api_terminate or openai_terminate:

@@ -34,5 +34,7 @@ RUN uv venv --python=3.12 && uv pip install -r requirements.txt -i https://mirro
 # # 非必要步骤，用于预热模块（可以删除）
 RUN python -c 'from check_proxy import warm_up_modules; warm_up_modules()'
 
+ENV CGO_ENABLED=0
+
 # 启动（必要）
 CMD ["bash", "-c", "python main.py"]
