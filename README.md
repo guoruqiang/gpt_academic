@@ -1,12 +1,12 @@
 > [!IMPORTANT]
-> `master主分支`最新动态(2025.8.23): Dockerfile构建效率大幅优化  
-> `master主分支`最新动态(2025.7.31): 新GUI前端，Coming Soon  
+> `master主分支`最新动态(2025.8.23): Dockerfile构建效率大幅优化
+> `master主分支`最新动态(2025.7.31): 新GUI前端，Coming Soon
 >
-> 2025.2.2: 三分钟快速接入最强qwen2.5-max[视频](https://www.bilibili.com/video/BV1LeFuerEG4)  
-> 2025.2.1: 支持自定义字体  
-> 2024.10.10: 突发停电，紧急恢复了提供[whl包](https://drive.google.com/drive/folders/14kR-3V-lIbvGxri4AHc8TpiA1fqsw7SK?usp=sharing)的文件服务器  
-> 2024.5.1: 加入Doc2x翻译PDF论文的功能，[查看详情](https://github.com/binary-husky/gpt_academic/wiki/Doc2x)  
-> 2024.3.11: 全力支持Qwen、GLM、DeepseekCoder等中文大语言模型！ SoVits语音克隆模块，[查看详情](https://www.bilibili.com/video/BV1Rp421S7tF/) 
+> 2025.2.2: 三分钟快速接入最强qwen2.5-max[视频](https://www.bilibili.com/video/BV1LeFuerEG4)
+> 2025.2.1: 支持自定义字体
+> 2024.10.10: 突发停电，紧急恢复了提供[whl包](https://drive.google.com/drive/folders/14kR-3V-lIbvGxri4AHc8TpiA1fqsw7SK?usp=sharing)的文件服务器
+> 2024.5.1: 加入Doc2x翻译PDF论文的功能，[查看详情](https://github.com/binary-husky/gpt_academic/wiki/Doc2x)
+> 2024.3.11: 全力支持Qwen、GLM、DeepseekCoder等中文大语言模型！ SoVits语音克隆模块，[查看详情](https://www.bilibili.com/video/BV1Rp421S7tF/)
 > 2024.1.17: 安装依赖时，请选择`requirements.txt`中**指定的版本**。 安装命令：`pip install -r requirements.txt`。
 
 <br>
@@ -63,7 +63,6 @@ Read this in [English](docs/README.English.md) | [日本語](docs/README.Japanes
 ⭐支持mermaid图像渲染 | 支持让GPT生成[流程图](https://www.bilibili.com/video/BV18c41147H9/)、状态转移图、甘特图、饼状图、GitGraph等等（3.7版本）
 ⭐Arxiv论文精细翻译 ([Docker](https://github.com/binary-husky/gpt_academic/pkgs/container/gpt_academic_with_latex)) | [插件] 一键[以超高质量翻译arxiv论文](https://www.bilibili.com/video/BV1dz4y1v77A/)，目前最好的论文翻译工具
 ⭐[实时语音对话输入](https://github.com/binary-husky/gpt_academic/blob/master/docs/use_audio.md) | [插件] 异步[监听音频](https://www.bilibili.com/video/BV1AV4y187Uy/)，自动断句，自动寻找回答时机
-⭐AutoGen多智能体插件 | [插件] 借助微软AutoGen，探索多Agent的智能涌现可能！
 ⭐虚空终端插件 | [插件] 能够使用自然语言直接调度本项目其他插件
 润色、翻译、代码解释 | 一键润色、翻译、查找论文语法错误、解释代码
 [自定义快捷键](https://www.bilibili.com/video/BV14s4y1E7jN) | 支持自定义快捷键
@@ -171,6 +170,11 @@ flowchart TD
     conda create -n gptac_venv python=3.11    # 创建anaconda环境
     conda activate gptac_venv                 # 激活anaconda环境
     python -m pip install -r requirements.txt # 这个步骤和pip安装一样的步骤
+
+    # （选择III: 使用uv）：
+    uv venv --python=3.11   # 创建虚拟环境
+    source ./.venv/bin/activate # 激活虚拟环境
+    uv pip install --verbose -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/ # 安装依赖
     ```
 
 
@@ -358,7 +362,7 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 
 ### II：版本:
 - version 3.80(TODO): 优化AutoGen插件主题并设计一系列衍生插件
-- version 3.70: 引入Mermaid绘图，实现GPT画脑图等功能   
+- version 3.70: 引入Mermaid绘图，实现GPT画脑图等功能
 - version 3.60: 引入AutoGen作为新一代插件的基石
 - version 3.57: 支持GLM3，星火v3，文心一言v4，修复本地模型的并发BUG
 - version 3.56: 支持动态追加基础功能按钮，新汇报PDF汇总页面
