@@ -470,6 +470,14 @@ def generate_payload(inputs:str, llm_kwargs:dict, history:list, system_prompt:st
         if llm_kwargs['llm_model'] in AZURE_CFG_ARRAY.keys():
             azure_api_key_unshared = AZURE_CFG_ARRAY[llm_kwargs['llm_model']]["AZURE_API_KEY"]
             headers.update({"api-key": azure_api_key_unshared})
+    
+    # 添加NWAFU_COOKIE到headers中
+    try:
+        from config_private import NWAFU_COOKIE
+        if NWAFU_COOKIE:
+            headers.update({"Cookie": NWAFU_COOKIE})
+    except:
+        pass
 
     if has_multimodal_capacity:
         # 当以下条件满足时，启用多模态能力：

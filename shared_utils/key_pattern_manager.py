@@ -10,6 +10,8 @@ default_user_name = 'default_user'
 
 # match openai keys
 openai_regex = re.compile(
+    r"sk-[a-zA-Z0-9_-]{32}$|" +
+    r"sk-[a-zA-Z0-9_-]{35}$|" +
     r"sk-[a-zA-Z0-9_-]{48}$|" +
     r"sk-[a-zA-Z0-9_-]{92}$|" +
     r"sk-proj-[a-zA-Z0-9_-]{48}$|"+

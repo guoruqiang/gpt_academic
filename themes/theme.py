@@ -20,7 +20,7 @@ def load_dynamic_theme(THEME):
         from .green import adjust_theme, advanced_css
 
         theme_declaration = (
-            '<h2 align="center"  class="small">[Chuanhu-Small-and-Beautiful主题]</h2>'
+            '<h3 align="center" class="small">本站由🎈一只爱跳水的兔子❤修改，仅适配西农deepseek平台使用。</h3>'
         )
     elif THEME == "High-Contrast":
         from .contrast import adjust_theme, advanced_css
