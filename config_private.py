@@ -13,8 +13,8 @@ DARK_MODE = False
 THEME = "Chuanhu-Small-and-Beautiful"
 
 LLM_MODEL = "one-api-Qwen3-235B-A22B" # 可选 ↓↓↓
-AVAIL_LLM_MODELS = ["one-api-Qwen3-235B-A22B", "Qwen3-235B-A22B", "Qwen3-32B", "bge-m3",
-                    "bge-reranker-large", "qwen3-235b-a22b-nothink", "Qwen3-VL-235B-A22B-Instruct"
+AVAIL_LLM_MODELS = ["one-api-Qwen3-235B-A22B", "one-api-Qwen3-235B-A22B", "one-api-Qwen3-32B", 
+                    "one-api-qwen3-235b-a22b-nothink", "one-api-Qwen3-VL-235B-A22B-Instruct"
                     ]
 
 # 字体修改，如果，替换方法，将"Theme-Default-Font"替换成下面的就行
